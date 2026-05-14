@@ -1,0 +1,200 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["fullTextIndex"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id    String  @id @default(uuid())
+  email String  @unique
+  password String
+  name  String
+  role  Role    @default(USER)
+  location String?
+  phone String?
+  bio   String? @db.Text
+  avatar String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  adoptionRequests AdoptionRequest[]
+  donations Donation[]
+  favorites PetFavorite[]
+  createdReports LostPetReport[] @relation("creator")
+  helpingReports LostPetReport[] @relation("helper")
+  adoptionNotes AdoptionNote[]
+  passwordResetToken PasswordResetToken?
+
+  @@map("users")
+}
+
+model Pet {
+  id String @id @default(uuid())
+  name String
+  species Species
+  breed String?
+  age Int?
+  size Size
+  energy Energy
+  location String?
+  image String? @db.VarChar(500)
+  images Json?
+  description String? @db.Text
+  compatibility Json?
+  vaccinated Boolean @default(false)
+  sterilized Boolean @default(false)
+  microchip Boolean @default(false)
+  available Boolean @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  adoptionRequests AdoptionRequest[]
+  favorites PetFavorite[]
+
+  @@fulltext([name, breed, description])
+  @@map("pets")
+}
+
+model AdoptionRequest {
+  id String @id @default(uuid())
+  userId String @map("user_id")
+  petId String @map("pet_id")
+  message String? @db.Text
+  status AdoptionStatus @default(PENDING)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+  notes AdoptionNote[]
+
+  @@unique([userId, petId])
+  @@map("adoption_requests")
+}
+
+model Donation {
+  id String @id @default(uuid())
+  userId String? @map("user_id")
+  amount Decimal @db.Decimal(10, 2)
+  currency String @default("MXN")
+  message String? @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("donations")
+}
+
+model PetFavorite {
+  id String @id @default(uuid())
+  userId String @map("user_id")
+  petId String @map("pet_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, petId])
+  @@map("pet_favorites")
+}
+
+model LostPetReport {
+  id String @id @default(uuid())
+  userId String @map("user_id")
+  helperId String? @map("helper_id")
+  title String
+  description String @db.Text
+  species Species
+  breed String?
+  lastSeenLocation String
+  latitude Decimal @db.Decimal(10, 8)
+  longitude Decimal @db.Decimal(11, 8)
+  contactPhone String
+  contactEmail String
+  status ReportStatus @default(LOST)
+  images Json?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation("creator", fields: [userId], references: [id], onDelete: Cascade)
+  helper User? @relation("helper", fields: [helperId], references: [id], onDelete: SetNull)
+
+  @@map("lost_pet_reports")
+}
+
+model AdoptionNote {
+  id String @id @default(uuid())
+  adoptionRequestId String @map("adoption_request_id")
+  userId String @map("user_id")
+  role NoteRole
+  content String @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  adoptionRequest AdoptionRequest @relation(fields: [adoptionRequestId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("adoption_notes")
+}
+
+model PasswordResetToken {
+  id String @id @default(uuid())
+  userId String @unique @map("user_id")
+  token String @unique
+  expiresAt DateTime @map("expires_at")
+  used Boolean @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Species {
+  DOG
+  CAT
+  BIRD
+  RABBIT
+  OTHER
+}
+
+enum Size {
+  SMALL
+  MEDIUM
+  LARGE
+}
+
+enum Energy {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum AdoptionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+enum ReportStatus {
+  LOST
+  FOUND
+  RESOLVED
+}
+
+enum NoteRole {
+  USER
+  ADMIN
+}

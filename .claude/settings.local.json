@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir \"C:\\\\PawMatchV3\")",
+      "Bash(dir \"C:\\\\\" 2>&1 | head -30 *)",
+      "PowerShell(npm create *)",
+      "PowerShell(docker --version)",
+      "PowerShell(netstat *)",
+      "Bash(netstat -tuln)",
+      "Bash(netstat -ano)",
+      "Bash(findstr :3000)",
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(curl -s -L http://localhost:3000 -w \"\\\\n%{http_code}\\\\n\")",
+      "Bash(curl -s http://localhost:3000/auth/login)",
+      "Bash(curl -s http://localhost:3000/admin)",
+      "Bash(npm install *)",
+      "Bash(npx prisma *)",
+      "Bash(mysql *)",
+      "PowerShell(Stop-Process *)",
+      "Bash(Remove-Item -Path \"C:\\\\PawMatchV3\\\\node_modules\\\\.prisma\" -Recurse -Force -ErrorAction SilentlyContinue)"
+    ]
+  }
+}
