@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 
 ForgotPassword.getLayout = (page) => page;
 
@@ -62,23 +60,24 @@ export default function ForgotPassword() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <Input
+            <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="tu@email.com"
               required
               disabled={loading}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
-          <Button
+          <button
             type="submit"
-            className="w-full bg-primary hover:bg-primary/90"
+            className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-2 rounded-lg disabled:opacity-50"
             disabled={loading}
           >
             {loading ? 'Enviando...' : 'Enviar enlace de recuperación'}
-          </Button>
+          </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-gray-600">

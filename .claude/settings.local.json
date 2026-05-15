@@ -17,7 +17,12 @@
       "Bash(npx prisma *)",
       "Bash(mysql *)",
       "PowerShell(Stop-Process *)",
-      "Bash(Remove-Item -Path \"C:\\\\PawMatchV3\\\\node_modules\\\\.prisma\" -Recurse -Force -ErrorAction SilentlyContinue)"
+      "Bash(Remove-Item -Path \"C:\\\\PawMatchV3\\\\node_modules\\\\.prisma\" -Recurse -Force -ErrorAction SilentlyContinue)",
+      "Bash(npm run *)",
+      "Bash(findstr -i eslint)",
+      "Bash(curl -s http://localhost:3000/)",
+      "Bash(pkill -f \"node.*next\")",
+      "PowerShell(Get-NetTCPConnection *)"
     ]
   }
 }
