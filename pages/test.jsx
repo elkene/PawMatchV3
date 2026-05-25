@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import { QUIZ_QUESTIONS, answersToFilters } from '@/lib/quiz-logic';
+import { QUIZ_QUESTIONS, answersToFilters, translateResults } from '@/lib/quiz-logic';
 
 export default function Quiz() {
   const router = useRouter();
@@ -31,7 +31,8 @@ export default function Quiz() {
       const res = await fetch(`/api/pets?${params}`);
       const data = await res.json();
       setResultsPets(data.pets || []);
-      setResults(filters);
+      const translatedResults = translateResults(filters);
+      setResults(translatedResults);
       setStage('results');
     } catch (error) {
       console.error('Error fetching results:', error);
