@@ -1,16 +1,56 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import { useSession } from 'next-auth/react';
 import { QUIZ_QUESTIONS, answersToFilters, translateResults } from '@/lib/quiz-logic';
+import PetDetailModal from '@/components/pets/PetDetailModal';
 
 export default function Quiz() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [stage, setStage] = useState('intro');
   const [answers, setAnswers] = useState({});
   const [results, setResults] = useState(null);
   const [resultsPets, setResultsPets] = useState([]);
+  const [selectedPet, setSelectedPet] = useState(null);
+  const [favorites, setFavorites] = useState([]);
 
   const handleStartQuiz = () => {
     setStage('questions');
+  };
+
+  const fetchFavorites = async () => {
+    try {
+      const res = await fetch('/api/pets/favorites');
+      if (res.ok) {
+        const data = await res.json();
+        setFavorites(data.favorites.map(f => f.petId));
+      }
+    } catch (error) {
+      console.error('Error fetching favorites:', error);
+    }
+  };
+
+  const handleFavorite = async (petId) => {
+    if (!session?.user?.id) {
+      router.push('/auth/login');
+      return;
+    }
+
+    const isFavorite = favorites.includes(petId);
+    try {
+      const method = isFavorite ? 'DELETE' : 'POST';
+      const res = await fetch(`/api/pets/${petId}/favorite`, { method });
+
+      if (res.ok) {
+        if (isFavorite) {
+          setFavorites(favorites.filter(id => id !== petId));
+        } else {
+          setFavorites([...favorites, petId]);
+        }
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
   };
 
   const handleAnswer = (questionId, value) => {
@@ -33,6 +73,9 @@ export default function Quiz() {
       setResultsPets(data.pets || []);
       const translatedResults = translateResults(filters);
       setResults(translatedResults);
+      if (session?.user?.id) {
+        fetchFavorites();
+      }
       setStage('results');
     } catch (error) {
       console.error('Error fetching results:', error);
@@ -173,7 +216,7 @@ export default function Quiz() {
                       <div
                         key={pet.id}
                         className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition cursor-pointer"
-                        onClick={() => router.push(`/pets/${pet.id}`)}
+                        onClick={() => setSelectedPet(pet)}
                       >
                         {pet.image && (
                           <img
@@ -213,7 +256,16 @@ export default function Quiz() {
               </div>
             </div>
           )}
+
+          {selectedPet && (
+            <PetDetailModal
+              pet={selectedPet}
+              isFavorite={favorites.includes(selectedPet.id)}
+              onFavorite={() => handleFavorite(selectedPet.id)}
+              onClose={() => setSelectedPet(null)}
+            />
+          )}
         </div>
-      </div>
+    </div>
   );
 }
